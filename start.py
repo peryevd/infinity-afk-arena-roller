@@ -28,8 +28,17 @@ def main():
     # Словарь для подсчета количества каждого файла
     count_dict = {}
     attempt_count = 0
+    screenshot_folder = "./images"
     # Относительный путь к папке где лежит скрипт
     images_directory = "./"
+
+    if not os.path.exists(screenshot_folder):
+        os.makedirs(screenshot_folder)
+
+    win = pyautogui.getActiveWindow()
+    print(win.title)
+    win_box = (max(0, win.left), max(0, win.top), win.width, win.height)
+    offset = win.width*0.35
 
     # Получаем список всех .png файлов в директории
     png_files = [f for f in os.listdir(images_directory) if f.endswith('.png')]
@@ -50,10 +59,22 @@ def main():
         # Перебираем все файлы и проверяем их наличие на экране
         for file in png_files:
             file_path = os.path.join(images_directory, file)
-            location = pyautogui.locateOnScreen(file_path, confidence=0.7)
+            location = pyautogui.locateOnScreen(
+                file_path, confidence=0.7,  region=win_box)
             if location:
                 count_dict[file] += 1
                 files_found += 1
+
+                # Генерируем уникальное имя файла для скриншота
+                base_name = os.path.splitext(file)[0]
+                screenshot_name = f"{base_name}_{count_dict[file]}.png"
+                screenshot_path = os.path.join(
+                    screenshot_folder, screenshot_name)  # Путь для сохранения
+
+                # Делаем скриншот и сохраняем его
+                pyautogui.screenshot(screenshot_path,  region=win_box)
+
+                print(f"Скриншот {screenshot_name} сохранен.")
 
         clear_console()
 
@@ -67,10 +88,11 @@ def main():
             return
 
         pyautogui.click()
-        time.sleep(0.5)
-        pyautogui.click()
         time.sleep(1)
-        pyautogui.click()
+        pyautogui.click((start_coords[0] + offset, start_coords[1]))
+        time.sleep(0.5)
+        pyautogui.click((start_coords[0] + offset, start_coords[1]))
+        pyautogui.moveTo(start_coords)
         time.sleep(1)
 
 
