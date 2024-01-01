@@ -33,7 +33,7 @@ epic_card_counts = [0] * 11
 
 plt.ion()
 fig, axs = plt.subplots(3, 1, figsize=(10, 8))
-fig.patch.set_facecolor('#24d468')
+fig.patch.set_facecolor('#6af8a0')
 
 header_text_obj = None
 
@@ -44,46 +44,27 @@ def update_graph(common, rare, epic):
     for ax in axs:
         ax.cla()
 
-    # Для каждого подграфика создаем столбчатую диаграмму
-    bars_common = axs[0].bar(
-        np.arange(len(common)), common, color='grey', edgecolor='black', linewidth=1)
-    axs[0].set_title('Обычные карты', fontsize=18, color='#033e19')
-    axs[0].set_xticks(np.arange(len(common)))
-    axs[0].set_facecolor('lightgray')
-    axs[0].grid(True, color="gray", linestyle='--',
-                linewidth=0.5, axis='y', alpha=0.7)
-    axs[0].tick_params(axis='both', which='both',
-                       labelsize=12, colors='#320611')
+    colors = ['grey', 'blue', 'gold']
+    titles = ['Обычные карты', 'Редкие карты', 'Другие карты']
+    facecolors = ['lightgray', 'lightblue', 'lightyellow']
+    label_colors = ['#033e19', '#095170', '#44520a']
 
-    bars_rare = axs[1].bar(np.arange(len(rare)), rare,
-                           color='blue', edgecolor='black', linewidth=1)
-    axs[1].set_title('Редкие карты', fontsize=18, color='#095170')
-    axs[1].set_xticks(np.arange(len(rare)))
-    axs[1].set_facecolor('lightblue')
-    axs[1].grid(True, color="gray", linestyle='--',
-                linewidth=0.5, axis='y', alpha=0.7)
-    axs[1].tick_params(axis='both', which='both',
-                       labelsize=12, colors='#320611')
-
-    bars_epic = axs[2].bar(np.arange(len(epic)), epic,
-                           color='gold', edgecolor='black', linewidth=1)
-    axs[2].set_title('Другие карты', fontsize=18, color='#44520a')
-    axs[2].set_xticks(np.arange(len(epic)))
-    axs[2].set_facecolor('lightyellow')
-    axs[2].grid(True, color="gray", linestyle='--',
-                linewidth=0.5, axis='y', alpha=0.7)
-    axs[2].tick_params(axis='both', which='both',
-                       labelsize=12, colors='#320611')
-
-    # Добавляем подписи количества на столбцы для каждого подграфика
-    for idx, bars in enumerate([bars_common, bars_rare, bars_epic]):
-        for bar in bars:
+    for i, (data, color, title, facecolor, label_color) in enumerate(zip([common, rare, epic], colors, titles, facecolors, label_colors)):
+        axs[i].bar(np.arange(len(data)), data, color=color,
+                   edgecolor='black', linewidth=1)
+        axs[i].set_title(title, fontsize=18, color=label_color)
+        axs[i].set_xticks(np.arange(len(data)))
+        axs[i].set_facecolor(facecolor)
+        axs[i].grid(True, color="gray", linestyle='--',
+                    linewidth=0.5, axis='y', alpha=0.7)
+        axs[i].tick_params(axis='both', which='both',
+                           labelsize=12, colors='#320611')
+        for bar in axs[i].patches:
             height = bar.get_height()
-            axs[idx].text(bar.get_x() + bar.get_width() / 2, height, f'{height}',
-                          ha='center', va='bottom')
-
-        ymax = max([bar.get_height() for bar in bars])
-        axs[idx].set_ylim(0, ymax + ymax * 0.2)
+            axs[i].text(bar.get_x() + bar.get_width() / 2, height,
+                        f'{height}', ha='center', va='bottom')
+        ymax = max([bar.get_height() for bar in axs[i].patches])
+        axs[i].set_ylim(0, ymax + ymax * 0.2)
 
     # Отображаем фигуру и оси
     fig.canvas.manager.window.setWindowTitle('Информация')
@@ -99,9 +80,9 @@ def send_photo(screenshot_name, screenshot_folder, win_box):
 
     curl_command = [
         'curl', '-X', 'POST',
-
+        # Используйте переменную
         f'https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendPhoto',
-        '-F', f'chat_id={CHAT_ID}',
+        '-F', f'chat_id={CHAT_ID}',  # Используйте переменную
         '-F', f'photo=@{screenshot_path}'
     ]
     subprocess.run(curl_command)
