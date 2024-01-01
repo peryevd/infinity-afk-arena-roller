@@ -2,3 +2,4 @@
 *.png
 build
 dist
+config.py
